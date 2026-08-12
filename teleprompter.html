@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Teleprompter Deck</title>
+    <!-- Google Fonts matching original PPT design system -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Malayalam:wght@400;600;700&family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #000000;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans Malayalam', -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Apple Subsurface Grid Mesh (Exact match from PPT) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 72px 72px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Animated Background Gradient Mesh (Exact match from PPT) */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -5%; left: -5%; 
+            width: 110%; height: 110%;
+            background-image: 
+                radial-gradient(circle at 85% 15%, rgba(52, 211, 153, 0.08) 0%, transparent 48%),
+                radial-gradient(circle at 15% 85%, rgba(168, 85, 247, 0.08) 0%, transparent 48%);
+            z-index: 1;
+            pointer-events: none;
+            animation: subtleGradientPulse 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtleGradientPulse {
+            0% { opacity: 0.5; transform: translate(0, 0) scale(0.98); }
+            50% { opacity: 0.85; transform: translate(14px, -10px) scale(1.02); }
+            100% { opacity: 0.6; transform: translate(-10px, 12px) scale(1); }
+        }
+
+        /* Top Progress Bar (PPT Style) */
+        .progress-bar-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 2000;
+        }
+
+        .progress-bar-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #38bdf8, #a855f7, #34d399);
+            transition: width 0.1s linear;
+        }
+
+        /* Fixed Apple Spatial Glass Controls Bar */
+        .controls-wrapper {
+            position: fixed;
+            top: 20px;
+            z-index: 1500;
+            width: calc(100% - 32px);
+            max-width: 960px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .controls-bar {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(28px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 10px 20px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            user-select: none;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            padding: 8px 18px;
+            border-radius: 9999px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            color: #030712;
+            border: none;
+            font-weight: 700;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .control-group input[type="range"] {
+            width: 80px;
+            accent-color: #38bdf8;
+            cursor: pointer;
+        }
+
+        /* Reading Focus Window */
+        .reading-guide {
+            position: fixed;
+            top: 38%;
+            left: 0;
+            width: 100vw;
+            height: 110px;
+            border-top: 1px solid rgba(56, 189, 248, 0.3);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.02) 0%, rgba(168, 85, 247, 0.04) 50%, rgba(56, 189, 248, 0.02) 100%);
+            backdrop-filter: blur(2px);
+            pointer-events: none;
+            z-index: 500;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.05);
+        }
+
+        /* Prompter Script Container */
+        .prompter-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 900px;
+            padding: 45vh 24px 60vh 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .prompter-container.mirrored {
+            transform: scaleX(-1);
+        }
+
+        /* Glass Cards for Slides (PPT Alignment) */
+        .slide-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(32px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 28px;
+            padding: clamp(28px, 4vw, 44px);
+            margin-bottom: 60px;
+            transition: border-color 0.3s ease;
+        }
+
+        .slide-card:hover {
+            border-color: rgba(56, 189, 248, 0.25);
+        }
+
+        /* Apple Pill Badges (PPT Alignment) */
+        .apple-badge {
+            align-items: center;
+            background: rgba(56, 189, 248, 0.08);
+            border-radius: 9999px;
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            color: #38bdf8;
+            display: inline-flex;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            gap: 8px;
+            padding: 6px 16px;
+            margin-bottom: 24px;
+        }
+
+        .apple-badge.purple {
+            background: rgba(168, 85, 247, 0.08);
+            border-color: rgba(168, 85, 247, 0.28);
+            color: #c084fc;
+        }
+
+        .apple-badge.emerald {
+            background: rgba(52, 211, 153, 0.08);
+            border-color: rgba(52, 211, 153, 0.28);
+            color: #34d399;
+        }
+
+        /* Speech Typography */
+        .speech-text {
+            font-size: 36px;
+            line-height: 1.75;
+            font-weight: 500;
+            color: #e2e8f0;
+            letter-spacing: -0.01em;
+        }
+
+        .speech-text p {
+            margin-bottom: 24px;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .sub-heading {
+            font-family: 'Outfit', sans-serif;
+            color: #c084fc;
+            font-size: 0.8em;
+            font-weight: 700;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
+        }
+
+        .bullet-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 20px;
+        }
+
+        .bullet-list li {
+            position: relative;
+            padding-left: 32px;
+            margin-bottom: 16px;
+        }
+
+        .bullet-list li::before {
+            content: "•";
+            color: #38bdf8;
+            position: absolute;
+            left: 8px;
+            font-size: 1.2em;
+            top: -2px;
+        }
+
+        /* Keyboard Hints Footer */
+        .keyboard-hints {
+            position: fixed;
+            bottom: 16px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 6px 18px;
+            border-radius: 9999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #64748b;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .keyboard-hints kbd {
+            background: rgba(255, 255, 255, 0.1);
+            color: #38bdf8;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .controls-wrapper { top: 12px; }
+            .controls-bar {
+                padding: 8px 14px;
+                gap: 10px;
+                border-radius: 20px;
+            }
+            .control-group input[type="range"] { width: 60px; }
+            .speech-text { font-size: 28px; }
+            .slide-card { padding: 20px; }
+            .keyboard-hints { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Progress Line -->
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <!-- Apple Spatial Controls Header -->
+    <div class="controls-wrapper">
+        <div class="controls-bar">
+            <button class="btn btn-primary" id="togglePlayBtn">
+                <i class="fa-solid fa-play" id="playIcon"></i> <span id="playText">Play</span>
+            </button>
+
+            <button class="btn" id="resetBtn">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+            </button>
+
+            <div class="control-group">
+                <i class="fa-solid fa-gauge-high" style="color:#38bdf8;"></i>
+                <label for="speedRange">Speed:</label>
+                <input type="range" id="speedRange" min="1" max="10" value="3" step="0.5">
+                <span id="speedVal" style="width: 20px; color:#f8fafc;">3</span>
+            </div>
+
+            <div class="control-group">
+                <i class="fa-solid fa-text-height" style="color:#c084fc;"></i>
+                <label for="fontRange">Size:</label>
+                <input type="range" id="fontRange" min="22" max="56" value="36">
+                <span id="fontVal" style="width: 32px; color:#f8fafc;">36px</span>
+            </div>
+
+            <button class="btn" id="mirrorBtn">
+                <i class="fa-solid fa-arrows-left-right"></i> Flip
+            </button>
+        </div>
+    </div>
+
+    <!-- Reading Focus Guide Line -->
+    <div class="reading-guide"></div>
+
+    <!-- Prompter Text Deck -->
+    <div class="prompter-container" id="prompterContent">
+
+        <!-- Slide 1 -->
+        <div class="slide-card">
+            <div class="apple-badge"><i class="fa-solid fa-layer-group"></i> Slide 01: Title & Introduction</div>
+            <div class="speech-text">
+                <p>"Hey everyone, welcome!"</p>
+                <p>"ഇന്നത്തെ കാലത്ത് നമ്മൾ ഏതൊരു AI tool യൂസ് ചെയ്താലും നമുക്ക് അതൊരു magic ആയിട്ടാണ് ഫീൽ ചെയ്യുന്നത്. Application ഉണ്ടാക്കി തരുന്നു, email-ന് reply അയച്ചു തരുന്നു, അങ്ങനെ എന്തെല്ലാം!</p>
+                <p>But, ആരും പറയാത്ത ഒരു truth ഉണ്ട് — <span class="highlight">AI is actually like a blindfolded person.</span></p>
+                <p>നമുക്ക് കിട്ടിയ ഒരു ഇമെയിലിന് reply അയക്കണം എന്ന് പറഞ്ഞാൽ, നമ്മൾ ആ mail കോപ്പി ചെയ്ത് AI-ക്ക് പേസ്റ്റ് ചെയ്ത് കൊടുക്കണം. ഇതിനെയാണ് നമ്മൾ AI-ക്ക് <span class="highlight">Context</span> കൊടുക്കുക എന്ന് പറയുന്നത്. നമ്മൾ ഇതിനെ ദിവസവും spoon-feed ചെയ്യുകയാണ്.</p>
+                <p>അവിടെയാണ് ഒരു വലിയ breakthrough ആയിക്കൊണ്ട് <span class="highlight">MCP — Model Context Protocol</span> വരുന്നത്."</p>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide-card">
+            <div class="apple-badge purple"><i class="fa-solid fa-timeline"></i> Slide 02: Evolution & Problem</div>
+            <div class="speech-text">
+                <p>"So, MCP-യിലോട്ട് കടക്കുന്നതിന് മുൻപ് AI-യുടെ ഇപ്പോഴത്തെ ഒരു അവസ്ഥ നോക്കാം."</p>
+                
+                <div class="sub-heading">Phase 1: Static Training Data</div>
+                <p>"നമ്മുടെ കൈയിൽ ChatGPT, Claude, DeepSeek പോലെയുള്ള പവർഫുൾ LLM-കൾ ഉണ്ട്. ബട്ട് ഇവരുടെ main problem എന്താണെന്ന് വച്ചാൽ, ഇവയ്ക്ക് training data cutoff വരെയുള്ള അറിവേ ഉള്ളൂ. ഇന്നത്തെ weather-ഓ, live match score-ഓ ചോദിച്ചാൽ അവയ്ക്ക് ഉത്തരമില്ല. നമ്മൾ മാനുവലായി വിവരങ്ങൾ കോപ്പി-പേസ്റ്റ് ചെയ്ത് കൊടുക്കേണ്ടി വരുന്നു.</p>
+                
+                <div class="sub-heading">Phase 2: Automated Context Retrieval</div>
+                <p>ഇതിനൊരു സൊല്യൂഷൻ ആയിട്ടാണ് വെബ് സെർച്ചും Google Calendar integration-ഉം Cursor AI പോലെയുള്ള ടൂളുകളും വന്നത്. നമ്മൾ കോപ്പി-പേസ്റ്റ് ചെയ്യാതെ തനിയെ context എടുക്കാൻ തുടങ്ങി."</p>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide-card">
+            <div class="apple-badge rose" style="background:rgba(244,63,94,0.08); border-color:rgba(244,63,94,0.28); color:#fb7185;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Slide 03: Integration Chaos
+            </div>
+            <div class="speech-text">
+                <p>"പക്ഷേ, ഇവിടെയാണ് അടുത്ത വലിയ പ്രോബ്ലം വരുന്നത്!"</p>
+                <p>"നമുക്ക് AI-യെ പുതിയ ടൂളുകളുമായി — അതായത് GitHub, SQL Databases, Gmail എന്നിവയുമായി connect ചെയ്യണം.</p>
+                <p>Imagine a meeting room: 10 ആളുകൾ ഉണ്ടെന്ന് വയ്ക്കുക. 10 പേരും സംസാരിക്കുന്നത് 10 ഡിഫറന്റ് ലാംഗ്വേജസ് ആണെങ്കിൽ എങ്ങനെയിരിക്കും? വളരെ കൺഫ്യൂസിങ് ആയിരിക്കും അല്ലേ? അതുപോലെയാണ് മൾട്ടിപ്പിൾ AI മോഡലുകൾ ഓരോ ടൂളിനു വേണ്ടിയും custom integration ക്രിയേറ്റ് ചെയ്യുന്നത്. ഇതിനെയാണ് നമ്മൾ <span class="highlight">M × N Integration Chaos</span> എന്ന് വിളിക്കുന്നത്.</p>
+                
+                <div class="sub-heading" style="color:#34d399;">The Solution:</div>
+                <p>പണ്ട് നമ്മുടെ നാട്ടിൽ Nokia ചാർജർ, Micro-USB, Lightning എന്ന് പറഞ്ഞ് മൾട്ടിപ്പിൾ കേബിളുകൾ ഉണ്ടായിരുന്നു. ബട്ട് USB-C വന്നപ്പോൾ എല്ലാം ഒറ്റ സ്റ്റാൻഡേർഡിലോട്ടായി.</p>
+                <p><span class="highlight">MCP is essentially the USB-C for AI!</span> ഒരു കോമൺ ലാംഗ്വേജ് കൊണ്ട് വന്ന് ഈ പ്രോബ്ലം ഒറ്റയടിക്ക് സോൾവ് ചെയ്യുന്നു."</p>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide-card">
+            <div class="apple-badge emerald"><i class="fa-solid fa-cubes"></i> Slide 04: What is MCP?</div>
+            <div class="speech-text">
+                <p>"So, എന്താണ് ഈ Model Context Protocol (MCP)?"</p>
+                <ul class="bullet-list">
+                    <li><span class="highlight">M - Model:</span> നമ്മുടെ ലാർജ് ലാംഗ്വേജ് മോഡലുകൾ (ChatGPT, Claude, Gemini etc.)</li>
+                    <li><span class="highlight">C - Context:</span> AI-ക്ക് നമ്മൾ നൽകുന്ന external data, database records, അല്ലെങ്കിൽ files.</li>
+                    <li><span class="highlight">P - Protocol:</span> കമ്പ്യൂട്ടറുകൾ തമ്മിൽ സംസാരിക്കാൻ ഉപയോഗിക്കുന്ന ഒരു കോമൺ ഭാഷ. (Just like HTTP is used for browsing websites!)</li>
+                </ul>
+                <p>"In short, LLM മോഡലുകൾക്ക് ഡിഫറന്റ് ടൂൾസുമായി സംസാരിക്കാൻ Anthropic കൊണ്ടുവന്ന ഒരു open standard protocol ആണ് MCP."</p>
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide-card">
+            <div class="apple-badge"><i class="fa-solid fa-diagram-project"></i> Slide 05: Architecture</div>
+            <div class="speech-text">
+                <p>"ഇനി ഇതിന്റെ Architecture എങ്ങനെയാണെന്ന് നോക്കാം."</p>
+                <p>"MCP-ക്ക് പ്രധാനമായും രണ്ട് ഭാഗങ്ങളുണ്ട്:</p>
+                <ul class="bullet-list">
+                    <li><span class="highlight">MCP Client:</span> നമ്മൾ യൂസ് ചെയ്യുന്ന AI App (e.g., Cursor IDE, Claude Desktop).</li>
+                    <li><span class="highlight">MCP Server:</span> പ്രത്യേക ടൂളുകളുമായി സംസാരിക്കാൻ കഴിവുള്ള lightweight programs (e.g., GitHub Server, SQL Server, Gmail Server).</li>
+                </ul>
+                <div class="sub-heading">How it works:</div>
+                <p>നമ്മൾ AI-യോട് പറയുകയാണ് <i>"Create a GitHub Repository"</i>.</p>
+                <p>തിരിച്ച് AI അതിലുള്ള MCP Client വഴി GitHub MCP Server-നെ കോൾ ചെയ്യുന്നു. സെർവർ പോയി റിയൽ GitHub-ൽ repo ക്രിയേറ്റ് ചെയ്ത ശേഷം റിസൾട്ട് തിരിച്ച് AI വഴി നമുക്ക് കാണിച്ച് തരുന്നു.</p>
+                <p>This works for both <span class="highlight">Local connections</span> (your hard drive files) and <span class="highlight">Remote connections</span> (Gmail/Cloud Databases)!"</p>
+            </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide-card">
+            <div class="apple-badge purple"><i class="fa-solid fa-sliders"></i> Slide 06: Core Primitives</div>
+            <div class="speech-text">
+                <p>"MCP-യിൽ പ്രധാനമായും 3 Primitives ആണുള്ളത്:"</p>
+                <ul class="bullet-list">
+                    <li><span class="highlight">Tools (Model-Driven):</span> AI-ക്ക് ചെയ്യാൻ പറ്റുന്ന active actions. (e.g., Run SQL query, create repo, write files).</li>
+                    <li><span class="highlight">Resources (App-Driven):</span> AI-ക്ക് വായിക്കാൻ മാത്രം നൽകുന്ന read-only data streams (postgres://, file:///).</li>
+                    <li><span class="highlight">Prompts (User-Driven):</span> സങ്കീർണ്ണമായ ടാസ്കുകൾ ചെയ്യാൻ നമ്മൾ നൽകുന്ന pre-built templates.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide-card">
+            <div class="apple-badge emerald"><i class="fa-solid fa-bolt"></i> Slide 07: Why MCP Matters</div>
+            <div class="speech-text">
+                <p>"ഡെവലപ്പർമാർക്കും Vibe Coders-നും എന്തുകൊണ്ടാണ് MCP ഒരു Game Changer ആകുന്നത്?"</p>
+                <ul class="bullet-list">
+                    <li><span class="highlight">Zero Documentation Reading:</span> Stripe അല്ലെങ്കിൽ ഏതെങ്കിലും API ഇന്റഗ്രേറ്റ് ചെയ്യുമ്പോൾ നൂറു പേജ് documentation വായിക്കേണ്ട. Official Stripe MCP Server കണക്റ്റ് ചെയ്താൽ AI തനിയെ പ്രോപ്പർ ആയി കോഡ് ഇന്റഗ്രേറ്റ് ചെയ്തോളും!</li>
+                    <li><span class="highlight">Support for Obscure Languages:</span> എഐ മോഡലുകൾക്ക് വ്യക്തമായ ട്രെയിനിങ് ഇല്ലാത്ത niche languages പോലുമുള്ള കോൺടെക്സ്റ്റ് MCP സെർവേഴ്സ് വഴി നൽകാം.</li>
+                    <li><span class="highlight">Built-in Security:</span> Local boundary സെറ്റ് ചെയ്യാനും, sensitive tokens ലീക്ക് ആകാതിരിക്കാനും ഇതിൽ security features ഉണ്ട്.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide-card">
+            <div class="apple-badge emerald"><i class="fa-solid fa-circle-check"></i> Slide 08: Wrap-Up</div>
+            <div class="speech-text">
+                <p>"To summarize..."</p>
+                <p>"ഒരു ടൂൾ എപ്പോഴും സ്മാർട്ട് ആകുന്നത് ഒരു സ്മാർട്ട് ഡെവലപ്പറുടെ കൈയിൽ കിട്ടുമ്പോഴാണ്!</p>
+                <p><span class="highlight">10x Developer</span> ആകാൻ ആഗ്രഹിക്കുന്ന ഏതൊരാളും അറിഞ്ഞിരിക്കേണ്ട സാങ്കേതികവിദ്യയാണ് MCP. Fundamentals ക്ലിയർ ആക്കുക, പുതിയ ടൂളുകളിലേക്ക് Adapt ചെയ്യുക.</p>
+                <p style="margin-top: 36px; color: #38bdf8; font-family:'Outfit', sans-serif; font-size: 1.15em; font-weight: 800;">Thank you so much! Any questions?</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Keyboard Shortcuts Bar -->
+    <div class="keyboard-hints">
+        Press <kbd>Space</kbd> Play/Pause &nbsp;|&nbsp; <kbd>↑</kbd> <kbd>↓</kbd> Speed &nbsp;|&nbsp; <kbd>Esc</kbd> Reset
+    </div>
+
+    <script>
+        let isScrolling = false;
+        let scrollSpeed = 3;
+        const prompterContent = document.getElementById('prompterContent');
+        const togglePlayBtn = document.getElementById('togglePlayBtn');
+        const playIcon = document.getElementById('playIcon');
+        const playText = document.getElementById('playText');
+        const speedRange = document.getElementById('speedRange');
+        const speedVal = document.getElementById('speedVal');
+        const fontRange = document.getElementById('fontRange');
+        const fontVal = document.getElementById('fontVal');
+        const resetBtn = document.getElementById('resetBtn');
+        const mirrorBtn = document.getElementById('mirrorBtn');
+        const progressBar = document.getElementById('progressBar');
+
+        // Scroll Engine
+        function autoScroll() {
+            if (isScrolling) {
+                window.scrollBy(0, scrollSpeed * 0.45);
+                updateProgress();
+                requestAnimationFrame(autoScroll);
+            }
+        }
+
+        function updateProgress() {
+            const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const currentProgress = (window.scrollY / totalHeight) * 100;
+            progressBar.style.width = `${Math.min(100, Math.max(0, currentProgress))}%`;
+        }
+
+        window.addEventListener('scroll', updateProgress);
+
+        function togglePlay() {
+            isScrolling = !isScrolling;
+            if (isScrolling) {
+                playIcon.className = "fa-solid fa-pause";
+                playText.textContent = "Pause";
+                togglePlayBtn.classList.replace("btn-primary", "btn");
+                requestAnimationFrame(autoScroll);
+            } else {
+                playIcon.className = "fa-solid fa-play";
+                playText.textContent = "Play";
+                togglePlayBtn.classList.replace("btn", "btn-primary");
+            }
+        }
+
+        function resetScroll() {
+            isScrolling = false;
+            playIcon.className = "fa-solid fa-play";
+            playText.textContent = "Play";
+            togglePlayBtn.classList.replace("btn", "btn-primary");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            progressBar.style.width = '0%';
+        }
+
+        // Controls Event Handlers
+        togglePlayBtn.addEventListener('click', togglePlay);
+        resetBtn.addEventListener('click', resetScroll);
+
+        speedRange.addEventListener('input', (e) => {
+            scrollSpeed = parseFloat(e.target.value);
+            speedVal.textContent = scrollSpeed;
+        });
+
+        fontRange.addEventListener('input', (e) => {
+            const fontSize = e.target.value + 'px';
+            fontVal.textContent = fontSize;
+            document.querySelectorAll('.speech-text').forEach(el => {
+                el.style.fontSize = fontSize;
+            });
+        });
+
+        mirrorBtn.addEventListener('click', () => {
+            prompterContent.classList.toggle('mirrored');
+        });
+
+        // Global Keyboard Controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlay();
+            } else if (e.code === 'ArrowUp') {
+                e.preventDefault();
+                scrollSpeed = Math.min(10, scrollSpeed + 0.5);
+                speedRange.value = scrollSpeed;
+                speedVal.textContent = scrollSpeed;
+            } else if (e.code === 'ArrowDown') {
+                e.preventDefault();
+                scrollSpeed = Math.max(1, scrollSpeed - 0.5);
+                speedRange.value = scrollSpeed;
+                speedVal.textContent = scrollSpeed;
+            } else if (e.code === 'Escape') {
+                resetScroll();
+            }
+        });
+    </script>
+</body>
+</html>
