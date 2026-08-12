@@ -1258,6 +1258,17 @@ document.addEventListener('DOMContentLoaded', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // Automatically converts all slide number tags into teleprompter links
+    document.querySelectorAll('.slide-number-tag').forEach(tag => {
+        const link = document.createElement('a');
+        link.className = tag.className;
+        link.href = 'teleprompter.html';
+        link.target = '_blank';
+        link.title = 'Open Teleprompter Script';
+        link.innerHTML = tag.innerHTML;
+        tag.parentNode.replaceChild(link, tag);
+    });
+
     // Keynote Edge Click Navigation (Left 20% = Back, Remaining 80% = Forward)
     document.addEventListener('click', (e) => {
         if (e.target.closest('a, button, input, textarea, pre')) return;
