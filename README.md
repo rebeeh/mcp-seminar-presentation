@@ -49,5 +49,5 @@ An interactive, 21-slide presentation deck designed for technical seminars and d
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/your-username/mcp-seminar-presentation.git](https://github.com/your-username/mcp-seminar-presentation.git)
+   git clone https://github.com/rebeeh/mcp-seminar-presentation.git
    cd mcp-seminar-presentation
