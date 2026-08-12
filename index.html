@@ -1265,6 +1265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         link.href = 'teleprompter.html';
         link.target = '_blank';
         link.title = 'Open Teleprompter Script';
+        link.style.textDecoration = 'none';
         link.innerHTML = tag.innerHTML;
         tag.parentNode.replaceChild(link, tag);
     });
