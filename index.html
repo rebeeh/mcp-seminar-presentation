@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Context Protocol (MCP) Seminar Presentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #000000;
+    color: #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    user-select: none;
+    cursor: default;
+}
+
+.slides-deck-wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1200px;
+    overflow: hidden;
+}
+
+/* Slide Container: Apple Spatial Whitespace & Full Window Framing */
+.slide-container {
+    align-items: flex-start;
+    background: #000000;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: clamp(44px, 7vh, 88px) clamp(48px, 8vw, 130px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.97) translateY(14px);
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.5s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Subtle Animated Background Gradient Layer (Low-Intensity Pulse + Soft Movement) */
+.slide-container::after {
+    content: '';
+    position: absolute;
+    top: -5%; 
+    left: -5%; 
+    width: 110%; 
+    height: 110%;
+    background-image: 
+        radial-gradient(circle at 85% 15%, rgba(52, 211, 153, 0.09) 0%, transparent 48%),
+        radial-gradient(circle at 15% 85%, rgba(168, 85, 247, 0.09) 0%, transparent 48%);
+    z-index: 1;
+    pointer-events: none;
+    animation: subtleGradientPulse 10s ease-in-out infinite alternate;
+}
+
+@keyframes subtleGradientPulse {
+    0% {
+        opacity: 0.5;
+        transform: translate(0, 0) scale(0.98);
+    }
+    50% {
+        opacity: 0.85;
+        transform: translate(14px, -10px) scale(1.02);
+    }
+    100% {
+        opacity: 0.6;
+        transform: translate(-10px, 12px) scale(1);
+    }
+}
+
+.slide-container.active-slide {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+    z-index: 10;
+}
+
+.slide-container * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Apple Subsurface Grid Mesh */
+.slide-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    background-size: 72px 72px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Slide Badge Tag - Top Right Glass Pill */
+.slide-number-tag {
+    position: absolute;
+    top: clamp(28px, 4vh, 48px);
+    right: clamp(32px, 5vw, 72px);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 7px 18px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Apple Typography System */
+.slide-title {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    color: #ffffff;
+    font-size: clamp(36px, 4.8vw, 62px);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+    margin-bottom: clamp(32px, 5vh, 58px);
+    text-align: left;
+    width: 100%;
+}
+
+.slide-title span {
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 45%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.slide-container h3 {
+    font-family: 'Outfit', sans-serif;
+    color: #f8fafc;
+    font-size: clamp(21px, 2.4vw, 27px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    margin-bottom: 14px;
+}
+
+.slide-container p,
+.slide-container li {
+    color: #94a3b8;
+    font-size: clamp(16px, 1.65vw, 19px);
+    line-height: 1.68;
+    letter-spacing: -0.01em;
+}
+
+/* Staggered Apple Entrance Keyframes */
+.active-slide .apple-badge {
+    animation: slideFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+}
+
+.active-slide .slide-title, 
+.active-slide h1 {
+    animation: slideFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+.active-slide .content-area,
+.active-slide .subtitle {
+    animation: slideFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+}
+
+.active-slide .tile, 
+.active-slide .glass-card, 
+.active-slide .timeline-step,
+.active-slide .table-layout {
+    animation: slideFadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+}
+
+.active-slide .image-wrapper, 
+.active-slide .image-container {
+    animation: slideScaleIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+@keyframes slideFadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideScaleIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(16px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Components, Cards & Bento Grids */
+.content-area {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Apple Pill Badges */
+.apple-badge {
+    align-items: center;
+    background: rgba(56, 189, 248, 0.08);
+    border-radius: 9999px;
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    color: #38bdf8;
+    display: inline-flex;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    gap: 8px;
+    padding: 7px 18px;
+    width: fit-content;
+}
+
+.apple-badge.emerald {
+    background: rgba(52, 211, 153, 0.08);
+    border-color: rgba(52, 211, 153, 0.28);
+    color: #34d399;
+}
+
+.apple-badge.rose {
+    background: rgba(244, 63, 94, 0.08);
+    border-color: rgba(244, 63, 94, 0.28);
+    color: #fb7185;
+}
+
+.apple-badge.purple {
+    background: rgba(168, 85, 247, 0.08);
+    border-color: rgba(168, 85, 247, 0.28);
+    color: #c084fc;
+}
+
+/* Bento Grid Layouts */
+.two-column {
+    display: grid;
+    gap: clamp(32px, 4.5vw, 64px);
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    align-items: center;
+    width: 100%;
+}
+
+/* Apple Glassmorphism Cards */
+.glass-card {
+    background: rgba(255, 255, 255, 0.025);
+    backdrop-filter: blur(32px) saturate(180%);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: clamp(30px, 3.8vw, 44px);
+    transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.038);
+    transform: translateY(-3px);
+}
+
+.glass-card.pro-card {
+    border-top: 3px solid #34d399;
+}
+
+.glass-card.con-card {
+    border-top: 3px solid #f43f5e;
+}
+
+/* Image Containers */
+.image-wrapper {
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    min-height: 280px;
+    height: 100%;
+    max-height: 400px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    background: #0f172a;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-wrapper img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    filter: brightness(0.88) contrast(1.08);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.image-wrapper:hover img {
+    transform: scale(1.04);
+}
+
+.image-wrapper .image-overlay-badge {
+    position: absolute;
+    bottom: 18px;
+    left: 18px;
+    z-index: 3;
+    background: rgba(3, 7, 18, 0.88);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.svg-fallback-graphic {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #38bdf8;
+    padding: 24px;
+}
+
+/* Lists */
+.apple-list {
+    list-style: none;
+}
+
+.apple-list li {
+    align-items: flex-start;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.apple-list li i {
+    color: #38bdf8;
+    font-size: 19px;
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+.apple-list.pros li i { color: #34d399; }
+.apple-list.cons li i { color: #fb7185; }
+
+.apple-list li strong {
+    color: #f8fafc;
+}
+
+/* Tiled Bento Grid */
+.tiled-content {
+    display: grid;
+    gap: clamp(24px, 2.8vw, 40px);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    width: 100%;
+}
+
+.tile {
+    background: rgba(255, 255, 255, 0.025);
+    backdrop-filter: blur(32px) saturate(180%);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    padding: clamp(30px, 3.8vw, 40px);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.tile:hover {
+    border-color: rgba(56, 189, 248, 0.38);
+    transform: translateY(-3px);
+}
+
+.tile .icon-box {
+    align-items: center;
+    background: rgba(56, 189, 248, 0.12);
+    border-radius: 16px;
+    color: #38bdf8;
+    display: flex;
+    font-size: 24px;
+    height: 56px;
+    justify-content: center;
+    margin-bottom: 22px;
+    width: 56px;
+}
+
+/* Tables */
+.table-layout {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table-layout table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.table-layout th,
+.table-layout td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 18px 22px;
+    text-align: left;
+}
+
+.table-layout th {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f8fafc;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.table-layout th:first-child { border-top-left-radius: 16px; }
+.table-layout th:last-child { border-top-right-radius: 16px; }
+
+.table-layout td {
+    color: #cbd5e1;
+    font-size: 15.5px;
+}
+
+/* Timeline Layout */
+.timeline-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
+    position: relative;
+    width: 100%;
+}
+
+.timeline-step {
+    background: rgba(11, 17, 30, 0.85);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 26px;
+    z-index: 2;
+}
+
+.timeline-step .node-header {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.timeline-step .node-number {
+    align-items: center;
+    background: #38bdf8;
+    border-radius: 50%;
+    color: #030712;
+    display: flex;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 800;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+    flex-shrink: 0;
+}
+
+/* Code Snippets */
+.code-box {
+    background: #020617;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.65;
+    padding: 22px;
+    overflow-x: auto;
+}
+
+.code-box .keyword { color: #c084fc; }
+.code-box .string { color: #34d399; }
+.code-box .property { color: #38bdf8; }
+
+/* Bleed Image Layout */
+.slide-container.bleed-image-layout {
+    display: grid;
+    gap: 0;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    padding: 0;
+    overflow: hidden;
+}
+
+.slide-container.bleed-image-layout .content-container {
+    padding: clamp(44px, 7vh, 88px) clamp(48px, 6vw, 96px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.slide-container.bleed-image-layout .image-container {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    min-height: 320px;
+    background: #090d16;
+}
+
+.slide-container.bleed-image-layout .image-container img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+/* Top Apple Progress Line */
+.progress-bar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.05);
+    z-index: 1000;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #38bdf8, #a855f7, #34d399);
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Title Slide Styling */
+.title-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    height: 100%;
+    max-width: 960px;
+}
+
+.title-layout h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(44px, 6vw, 82px);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    color: #ffffff;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+.title-layout h1 span {
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.title-layout .subtitle {
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: #94a3b8;
+    line-height: 1.5;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+}
+
+/* Q&A / Conclusion Slide */
+.qa-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+}
+
+.qa-layout h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(48px, 6.5vw, 86px);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+    margin-top: 24px;
+    margin-bottom: 16px;
+}
+
+.qa-layout p {
+    font-size: clamp(20px, 2.5vw, 28px);
+    color: #38bdf8;
+    margin-bottom: 32px;
+}
+
+.qa-layout .contact-info {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px 24px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 768px) {
+    .slide-container { padding: 32px 24px 40px 24px; }
+}
+    </style>
+</head>
+<body>
+
+<div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progressBar"></div>
+</div>
+
+<div class="slides-deck-wrapper">
+
+<!-- SLIDE 1: Title Slide -->
+<div class="slide-container active-slide" id="slide1">
+    <div class="slide-number-tag">01 / 21</div>
+    <div class="title-layout">
+        <div class="apple-badge"><i class="fa-solid fa-layer-group"></i> Technical Seminar Presentation</div>
+        <h1>Model Context Protocol <span>(MCP)</span></h1>
+        <p class="subtitle">An Open Standard for Connecting AI Models to Enterprise Data Sources, Systems, and Tools</p>
+    </div>
+</div>
+
+<!-- SLIDE 2: Executive Summary -->
+<div class="slide-container" id="slide2">
+    <div class="slide-number-tag">02 / 21</div>
+    <h2 class="slide-title">Executive Summary: <span>Why MCP Matters</span></h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-plug-circle-bolt"></i></div>
+                <h3>Universal Connector</h3>
+                <p>Replaces fragmented glue code with a standardized protocol for AI context streaming and tool execution.</p>
+            </div>
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>Security & Privacy</h3>
+                <p>Enforces process sandboxing, directory boundary roots, and explicit human consent loops.</p>
+            </div>
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-diagram-project"></i></div>
+                <h3>Architecture Primacy</h3>
+                <p>Decouples model providers from underlying backend system schemas, drastically cutting engineering debt.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 3: The Problem (M x N Complexity) -->
+<div class="slide-container" id="slide3">
+    <div class="slide-number-tag">03 / 21</div>
+    <h2 class="slide-title">The Problem: <span>M × N Integration Chaos</span></h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <div class="apple-badge rose" style="margin-bottom:24px;"><i class="fa-solid fa-triangle-exclamation"></i> Fragmented Ecosystem</div>
+                <ul class="apple-list cons">
+                    <li><i class="fa-solid fa-circle-xmark"></i> <strong>Combinatorial Explosion:</strong> Integrating <i>M</i> AI models with <i>N</i> tools yields M × N fragile custom pipelines.</li>
+                    <li><i class="fa-solid fa-circle-xmark"></i> <strong>Maintenance Burden:</strong> Every client app requires unique authentication wrappers and custom API parsers.</li>
+                    <li><i class="fa-solid fa-circle-xmark"></i> <strong>Siloed Enterprise Data:</strong> Codebases, DBs, and local tools remain locked behind custom integrations.</li>
+                </ul>
+            </div>
+            <div>
+                <div class="image-wrapper">
+                    <img alt="Complex infrastructure server wire tangle" 
+                         src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1000&q=80" 
+                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'svg-fallback-graphic\'><svg width=\'80\' height=\'80\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.5\'><path d=\'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5\'/></svg></div>';">
+                    <div class="image-overlay-badge"><i class="fa-solid fa-network-wired"></i> Heterogeneous Data Mesh</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 4: Technical Debt & Maintenance Overhead -->
+<div class="slide-container" id="slide4">
+    <div class="slide-number-tag">04 / 21</div>
+    <h2 class="slide-title">Technical Debt: <span>The Cost of Ad-Hoc APIs</span></h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="glass-card con-card">
+                <div class="apple-badge rose" style="margin-bottom:18px;">Point-to-Point Fragility</div>
+                <h3>High Refactoring Overhead</h3>
+                <p>Upgrading a backend schema breaks every custom model integration wrapper across all host applications simultaneously, creating constant dev friction.</p>
+            </div>
+            <div class="glass-card con-card">
+                <div class="apple-badge rose" style="margin-bottom:18px;">Security Blindspots</div>
+                <h3>Inconsistent Access Controls</h3>
+                <p>Without unified security boundaries, each custom API integration handles authorization, secret management, and rate-limiting independently.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 5: The Paradigm Shift (M + N Solution) -->
+<div class="slide-container" id="slide5">
+    <div class="slide-number-tag">05 / 21</div>
+    <h2 class="slide-title">The Paradigm Shift: <span>M + N Standardized Topology</span></h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="glass-card">
+                <div class="apple-badge rose" style="margin-bottom:18px;">Legacy Architecture</div>
+                <h3>M × N Custom Integrations</h3>
+                <p style="margin-bottom:20px;">Connecting 5 AI clients to 10 enterprise tools requires <strong>50 distinct custom pipelines</strong>.</p>
+                <div class="code-box">Client_A -&gt; Custom_Wrapper -&gt; Database_X<br>Client_B -&gt; Custom_Wrapper -&gt; Database_X</div>
+            </div>
+            <div class="glass-card" style="border-color: rgba(56, 189, 248, 0.3);">
+                <div class="apple-badge emerald" style="margin-bottom:18px;">MCP Architecture</div>
+                <h3>M + N Standard Interfaces</h3>
+                <p style="margin-bottom:20px;">Connecting 5 AI clients to 10 enterprise tools requires only <strong>15 standardized endpoints</strong>.</p>
+                <div class="code-box"><span class="property">MCP_Client</span> -&gt; <span class="keyword">JSON-RPC Standard</span> -&gt; <span class="string">MCP_Server</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 6: Core Topology -->
+<div class="slide-container" id="slide6">
+    <div class="slide-number-tag">06 / 21</div>
+    <h2 class="slide-title">Core Topology: <span>Hosts, Clients & Servers</span></h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-desktop"></i></div>
+                <h3>MCP Host</h3>
+                <p>The container environment (Claude Desktop, Cursor, IDEs) initiating model queries and securing user consent.</p>
+            </div>
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-code-compare"></i></div>
+                <h3>MCP Client</h3>
+                <p>Embedded protocol consumer in the host that negotiates capabilities and manages RPC connections.</p>
+            </div>
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-server"></i></div>
+                <h3>MCP Server</h3>
+                <p>Lightweight service exposing specific tools, resources, and prompt templates over standardized transports.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 7: Host & Client Runtime Mechanics -->
+<div class="slide-container bleed-image-layout" id="slide7">
+    <div class="slide-number-tag" style="z-index: 10;">07 / 21</div>
+    <div class="content-container">
+        <h2 class="slide-title">Runtime Mechanics: <span>Host & Client</span></h2>
+        <div class="content-area">
+            <div class="glass-card">
+                <p style="margin-bottom:20px;">MCP Hosts manage user authorizations and inference loops. The embedded client dynamically negotiates capabilities with local or remote server endpoints.</p>
+                <p>This separates tool logic from client code, enabling instant extensibility without recompiling the host application.</p>
+            </div>
+        </div>
+    </div>
+    <div class="image-container">
+        <img class="bleed-image-side" 
+             alt="Modern developer desktop coding environment dark UI" 
+             src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1000&q=80"
+             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'svg-fallback-graphic\'><i class=\'fa-solid fa-code fa-4x\'></i></div>';">
+    </div>
+</div>
+
+<!-- SLIDE 8: MCP Server Architecture -->
+<div class="slide-container" id="slide8">
+    <div class="slide-number-tag">08 / 21</div>
+    <h2 class="slide-title">MCP Server: <span>Internal Architecture</span></h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-layer-group"></i></div>
+                <h3>Capability Exposure</h3>
+                <p>Servers declare capability manifests listing available tools, readable resources, and prompt templates during handshake.</p>
+            </div>
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-sliders"></i></div>
+                <h3>Transport Layer</h3>
+                <p>Handles incoming RPC streams via stdio or Server-Sent Events (SSE), mapping standard calls to local actions.</p>
+            </div>
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-shield"></i></div>
+                <h3>Context Isolation</h3>
+                <p>Executes commands within isolated sub-processes, preventing unauthorized host filesystem access.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 9: Protocol Primitives Overview -->
+<div class="slide-container" id="slide9">
+    <div class="slide-number-tag">09 / 21</div>
+    <h2 class="slide-title">Protocol Primitives: <span>Core Capabilities</span></h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-wrench"></i></div>
+                <h3>Tools (Model-Driven)</h3>
+                <p>Executable functions exposed by servers that models invoke to alter state or execute computations.</p>
+            </div>
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-database"></i></div>
+                <h3>Resources (App-Driven)</h3>
+                <p>Passive, readable data streams exposed via URI schemas (`file:///`, `postgres://`) for model grounding.</p>
+            </div>
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-terminal"></i></div>
+                <h3>Prompts (User-Driven)</h3>
+                <p>Pre-packaged interaction templates provided by servers to guide complex multi-step AI reasoning.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 10: Spotlight on Resources -->
+<div class="slide-container" id="slide10">
+    <div class="slide-number-tag">10 / 21</div>
+    <h2 class="slide-title">Spotlight: <span>Context Resources</span></h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <div class="apple-badge emerald" style="margin-bottom:20px;">Read-Only Data Access</div>
+                <ul class="apple-list">
+                    <li><i class="fa-solid fa-check"></i> <strong>URI Addressing:</strong> Resources use standard URIs like <code>postgres://db/table</code> or <code>file:///logs/app.log</code>.</li>
+                    <li><i class="fa-solid fa-check"></i> <strong>Real-time Subscriptions:</strong> Clients can subscribe to resource updates and receive dynamic notifications when underlying data shifts.</li>
+                </ul>
+            </div>
+            <div>
+                <div class="image-wrapper" style="margin-bottom: 16px;">
+                    <img alt="Database server rack glow" 
+                         src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1000&q=80"
+                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'svg-fallback-graphic\'><i class=\'fa-solid fa-database fa-4x\'></i></div>';">
+                    <div class="image-overlay-badge"><i class="fa-solid fa-database"></i> Dynamic Data Stream Ingestion</div>
+                </div>
+                <div class="code-box">
+                    <span class="keyword">// MCP Resource Request</span><br>
+                    {<br>
+                    &nbsp;&nbsp;<span class="property">"method"</span>: <span class="string">"resources/read"</span>,<br>
+                    &nbsp;&nbsp;<span class="property">"params"</span>: {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="property">"uri"</span>: <span class="string">"file:///workspace/src/app.ts"</span><br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 11: Spotlight on Tools -->
+<div class="slide-container" id="slide11">
+    <div class="slide-number-tag">11 / 21</div>
+    <h2 class="slide-title">Spotlight: <span>Executable Tools</span></h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <div class="code-box">
+                    <span class="keyword">// MCP Tool Execution Call</span><br>
+                    {<br>
+                    &nbsp;&nbsp;<span class="property">"method"</span>: <span class="string">"tools/call"</span>,<br>
+                    &nbsp;&nbsp;<span class="property">"params"</span>: {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="property">"name"</span>: <span class="string">"execute_query"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="property">"arguments"</span>: { <span class="property">"sql"</span>: <span class="string">"SELECT * FROM users"</span> }<br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                </div>
+            </div>
+            <div>
+                <div class="apple-badge" style="margin-bottom:20px;">Active Function Execution</div>
+                <ul class="apple-list">
+                    <li><i class="fa-solid fa-bolt"></i> <strong>Model Choice:</strong> The AI model evaluates tool descriptions and JSON schemas to decide when and how to invoke tools.</li>
+                    <li><i class="fa-solid fa-shield-cat"></i> <strong>State Modification:</strong> Tools can perform write operations, API calls, or run scripts, backed by human authorization gates.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 12: Spotlight on Prompts -->
+<div class="slide-container" id="slide12">
+    <div class="slide-number-tag">12 / 21</div>
+    <h2 class="slide-title">Spotlight: <span>Prompt Templates</span></h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-sliders"></i></div>
+                <h3>Standardized Inputs</h3>
+                <p>Prompts allow servers to expose pre-designed task arguments (e.g., <code>bug_report(severity, component)</code>).</p>
+            </div>
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-sitemap"></i></div>
+                <h3>Guided Reasoning</h3>
+                <p>Ensures consistent AI output formats across teams by embedding contextual guidelines into prompt templates.</p>
+            </div>
+            <div class="tile">
+                <div class="icon-box"><i class="fa-solid fa-user-gear"></i></div>
+                <h3>User Invocation</h3>
+                <p>Triggered directly by end-users via host commands or slash shortcuts to launch structured workflows.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 13: Primitive Feature Matrix -->
+<div class="slide-container" id="slide13">
+    <div class="slide-number-tag">13 / 21</div>
+    <h2 class="slide-title">Primitives Matrix: <span>Technical Comparison</span></h2>
+    <div class="content-area">
+        <div class="table-layout">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Primitive</th>
+                        <th>Initiator</th>
+                        <th>Control Axis</th>
+                        <th>Primary Purpose</th>
+                        <th>Security Profile</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong style="color:#38bdf8;">Tools</strong></td>
+                        <td>AI Model</td>
+                        <td>Active / State Modifying</td>
+                        <td>Actions, API mutations, execution</td>
+                        <td>High (Requires explicit consent)</td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:#34d399;">Resources</strong></td>
+                        <td>Application / Host</td>
+                        <td>Passive / Read-Only Context</td>
+                        <td>File content, logs, DB context</td>
+                        <td>Medium (Boundary scoped)</td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:#c084fc;">Prompts</strong></td>
+                        <td>User / Operator</td>
+                        <td>Workflow Guidance</td>
+                        <td>Standardized tasks & templates</td>
+                        <td>Low (Declarative text)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 14: Transport Protocols -->
+<div class="slide-container" id="slide14">
+    <div class="slide-number-tag">14 / 21</div>
+    <h2 class="slide-title">Transport Layer: <span>stdio & SSE Transports</span></h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="glass-card">
+                <div class="apple-badge"><i class="fa-solid fa-microchip"></i> Local Transport</div>
+                <h3 style="margin-top:16px;">stdio (Standard I/O)</h3>
+                <p style="margin-bottom:16px;">In-process sub-process communication for local desktop environments (e.g., Claude Desktop launching local CLI tools).</p>
+                <ul class="apple-list">
+                    <li><i class="fa-solid fa-check"></i> Near-zero latency IPC</li>
+                    <li><i class="fa-solid fa-check"></i> Direct OS process sandboxing</li>
+                </ul>
+            </div>
+            <div>
+                <div class="image-wrapper">
+                    <img alt="High speed fiber optic transport hardware" 
+                         src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1000&q=80"
+                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'svg-fallback-graphic\'><i class=\'fa-solid fa-network-wired fa-4x\'></i></div>';">
+                    <div class="image-overlay-badge"><i class="fa-solid fa-network-wired"></i> High-Speed Streaming IPC</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 15: Protocol Session Lifecycle -->
+<div class="slide-container" id="slide15">
+    <div class="slide-number-tag">15 / 21</div>
+    <h2 class="slide-title">Session Lifecycle: <span>RPC Handshake Flow</span></h2>
+    <div class="content-area">
+        <div class="timeline-layout">
+            <div class="timeline-step">
+                <div class="node-header">
+                    <div class="node-number">1</div>
+                    <h3>Initialize</h3>
+                </div>
+                <p>Protocol version handshake & capability negotiation.</p>
+            </div>
+            <div class="timeline-step">
+                <div class="node-header">
+                    <div class="node-number">2</div>
+                    <h3>Discovery</h3>
+                </div>
+                <p>Client retrieves active manifests for Tools, Resources & Prompts.</p>
+            </div>
+            <div class="timeline-step">
+                <div class="node-header">
+                    <div class="node-number">3</div>
+                    <h3>Execution</h3>
+                </div>
+                <p>Model triggers tool execution over active transport channel.</p>
+            </div>
+            <div class="timeline-step">
+                <div class="node-header">
+                    <div class="node-number">4</div>
+                    <h3>Response</h3>
+                </div>
+                <p>Server executes action & streams verified result payload back.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 16: Security Model & Sandboxing -->
+<div class="slide-container" id="slide16">
+    <div class="slide-number-tag">16 / 21</div>
+    <h2 class="slide-title">Security Model: <span>Sandboxing & Consent</span></h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <ul class="apple-list">
+                    <li><i class="fa-solid fa-shield-halved"></i> <strong>Directory Roots Boundary:</strong> Restricts server file access strictly to user-approved workspace paths.</li>
+                    <li><i class="fa-solid fa-user-check"></i> <strong>Human-in-the-Loop Approval:</strong> Prompting users explicitly before invoking state-modifying tools.</li>
+                    <li><i class="fa-solid fa-lock"></i> <strong>Token Scrubbing:</strong> Prevents credential leakage across unverified remote server endpoints.</li>
+                </ul>
+            </div>
+            <div>
+                <div class="image-wrapper" style="margin-bottom:16px;">
+                    <img alt="Cyber security digital shield protection" 
+                         src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1000&q=80"
+                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'svg-fallback-graphic\'><i class=\'fa-solid fa-shield-halved fa-4x\'></i></div>';">
+                    <div class="image-overlay-badge"><i class="fa-solid fa-lock"></i> Zero-Trust Execution Scope</div>
+                </div>
+                <div class="code-box">
+                    <span class="keyword">// Security Roots Specification</span><br>
+                    {<br>
+                    &nbsp;&nbsp;<span class="property">"method"</span>: <span class="string">"roots/list"</span>,<br>
+                    &nbsp;&nbsp;<span class="property">"params"</span>: {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="property">"roots"</span>: [<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="property">"uri"</span>: <span class="string">"file:///Users/dev/project"</span> }<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;]<br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 17: Architectural Advantages -->
+<div class="slide-container" id="slide17">
+    <div class="slide-number-tag">17 / 21</div>
+    <h2 class="slide-title">Architectural Pros: <span>System Advantages</span></h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile glass-card pro-card">
+                <div class="icon-box" style="color:#34d399; background:rgba(52,211,153,0.12);"><i class="fa-solid fa-expand"></i></div>
+                <h3>Scalability</h3>
+                <p>Add enterprise integrations without needing host client updates or model retraining.</p>
+            </div>
+            <div class="tile glass-card pro-card">
+                <div class="icon-box" style="color:#34d399; background:rgba(52,211,153,0.12);"><i class="fa-solid fa-user-shield"></i></div>
+                <h3>User Privacy</h3>
+                <p>Data stays inside local host environments; secrets never leak to external LLM providers.</p>
+            </div>
+            <div class="tile glass-card pro-card">
+                <div class="icon-box" style="color:#34d399; background:rgba(52,211,153,0.12);"><i class="fa-solid fa-handshake"></i></div>
+                <h3>Interoperability</h3>
+                <p>Open specification supported by Anthropic and Linux Foundation avoids vendor lock-in.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 18: Architectural Trade-offs & Challenges -->
+<div class="slide-container" id="slide18">
+    <div class="slide-number-tag">18 / 21</div>
+    <h2 class="slide-title">Trade-offs & <span>Engineering Challenges</span></h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile glass-card con-card">
+                <div class="icon-box" style="color:#fb7185; background:rgba(244,63,94,0.12);"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <h3>Serialization Overhead</h3>
+                <p>JSON-RPC marshaling over stdio/SSE introduces slight millisecond latencies.</p>
+            </div>
+            <div class="tile glass-card con-card">
+                <div class="icon-box" style="color:#fb7185; background:rgba(244,63,94,0.12);"><i class="fa-solid fa-box-archive"></i></div>
+                <h3>Context Bloat</h3>
+                <p>Exposing large resource schemas consumes valuable LLM input context window space.</p>
+            </div>
+            <div class="tile glass-card con-card">
+                <div class="icon-box" style="color:#fb7185; background:rgba(244,63,94,0.12);"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                <h3>Server Runtimes</h3>
+                <p>Requires local runtime management (Node.js/Python) for executable MCP servers.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 19: Protocol Matrix -->
+<div class="slide-container" id="slide19">
+    <div class="slide-number-tag">19 / 21</div>
+    <h2 class="slide-title">Protocol Matrix: <span>MCP vs Alternatives</span></h2>
+    <div class="content-area">
+        <div class="table-layout">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature Axis</th>
+                        <th>MCP Standard</th>
+                        <th>Custom REST APIs</th>
+                        <th>OpenAI Function Calling</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Schema Standard</strong></td>
+                        <td>JSON-RPC 2.0 Spec</td>
+                        <td>Ad-hoc / OpenAPI</td>
+                        <td>Proprietary Schema</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Transport Layer</strong></td>
+                        <td>stdio + SSE HTTP</td>
+                        <td>HTTP / WebSocket</td>
+                        <td>HTTPS Request</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Context Resources</strong></td>
+                        <td>Native URI Streams</td>
+                        <td>Manual Ingestion</td>
+                        <td>Manual Prompt Injection</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Model Agnostic</strong></td>
+                        <td><i class="fa-solid fa-check" style="color:#34d399;"></i> Yes (Universal)</td>
+                        <td><i class="fa-solid fa-check" style="color:#34d399;"></i> Yes</td>
+                        <td><i class="fa-solid fa-xmark" style="color:#fb7185;"></i> Vendor Locked</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 20: Enterprise Ecosystem & Production Use Cases -->
+<div class="slide-container" id="slide20">
+    <div class="slide-number-tag">20 / 21</div>
+    <h2 class="slide-title">Enterprise Ecosystem & <span>Adoption</span></h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <div class="glass-card" style="margin-bottom: 20px;">
+                    <h3>Developer Tools & IDEs</h3>
+                    <p style="margin-bottom:14px;">Claude Desktop, Cursor, Zed, and VS Code leverage MCP to query git histories, execute tests, and analyze syntax trees safely.</p>
+                    <div class="apple-badge"><i class="fa-solid fa-code"></i> Developer Environments</div>
+                </div>
+                <div class="glass-card">
+                    <h3>Enterprise Connectors</h3>
+                    <p style="margin-bottom:14px;">Pre-built MCP servers for PostgreSQL, GitHub, Slack, Google Drive, and Jira offer instant conversational AI access to organizational data.</p>
+                    <div class="apple-badge emerald"><i class="fa-solid fa-database"></i> Data Sources</div>
+                </div>
+            </div>
+            <div>
+                <div class="image-wrapper">
+                    <img alt="Global network connection digital mesh tech" 
+                         src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1000&q=80"
+                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'svg-fallback-graphic\'><i class=\'fa-solid fa-globe fa-4x\'></i></div>';">
+                    <div class="image-overlay-badge"><i class="fa-solid fa-globe"></i> Enterprise AI Mesh Ecosystem</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 21: Conclusion & Q&A -->
+<div class="slide-container" id="slide21">
+    <div class="slide-number-tag">21 / 21</div>
+    <div class="qa-layout">
+        <div class="apple-badge emerald"><i class="fa-solid fa-circle-check"></i> Presentation Conclusion</div>
+        <h2>Thank You!</h2>
+        <p>Questions & Architectural Discussion</p>
+        <div class="contact-info">
+            Specification: modelcontextprotocol.io &nbsp;|&nbsp; Open Source Protocol Standard
+        </div>
+    </div>
+</div>
+
+</div> <!-- end slides-deck-wrapper -->
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const slides = document.querySelectorAll('.slide-container');
+    const totalSlides = slides.length;
+    let currentSlideIndex = 0;
+
+    const progressBar = document.getElementById('progressBar');
+
+    function updateSlideView(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        
+        currentSlideIndex = index;
+        
+        slides.forEach((slide, idx) => {
+            if (idx === currentSlideIndex) {
+                slide.classList.add('active-slide');
+            } else {
+                slide.classList.remove('active-slide');
+            }
+        });
+
+        const progressPercent = ((currentSlideIndex + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Keynote Edge Click Navigation (Left 20% = Back, Remaining 80% = Forward)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('a, button, input, textarea, pre')) return;
+        
+        const clickX = e.clientX;
+        const windowWidth = window.innerWidth;
+        
+        if (clickX < windowWidth * 0.20) {
+            updateSlideView(currentSlideIndex - 1);
+        } else {
+            updateSlideView(currentSlideIndex + 1);
+        }
+    });
+
+    // Keyboard Arrow Controls
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'Space' || e.key === 'PageDown') {
+            e.preventDefault();
+            updateSlideView(currentSlideIndex + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+            e.preventDefault();
+            updateSlideView(currentSlideIndex - 1);
+        }
+    });
+
+    // Touch Swipe Gestures
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const swipeThreshold = 50;
+        if (touchEndX < touchStartX - swipeThreshold) {
+            updateSlideView(currentSlideIndex + 1);
+        } else if (touchEndX > touchStartX + swipeThreshold) {
+            updateSlideView(currentSlideIndex - 1);
+        }
+    }, { passive: true });
+
+    // Initialize presentation deck
+    updateSlideView(0);
+});
+</script>
+
+</body>
+</html>
